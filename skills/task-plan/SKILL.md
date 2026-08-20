@@ -89,9 +89,27 @@ Save the plan to:
 
 Create the `.codex` directory if it does not exist.
 
-The plan file is a temporary working file for the current task.
+The plan file is a temporary local working file for the current task.
 
 Do not add it to git staging and do not commit it unless the user explicitly asks.
+
+Do not modify the project's `.gitignore` only to hide the implementation plan.
+
+If the current project is a Git repository:
+
+1. Resolve the repository-local exclude file with:
+
+   `git rev-parse --git-path info/exclude`
+
+2. Ensure this exact entry exists in that file:
+
+   `.codex/IMPLEMENTATION_PLAN.md`
+
+3. Add it only if it is missing.
+
+This keeps the implementation plan out of `git status` without changing shared repository configuration.
+
+If the project is not a Git repository, skip this step.
 
 If `.codex/IMPLEMENTATION_PLAN.md` already exists for another task, replace its contents with the new task plan.
 
@@ -109,6 +127,8 @@ The plan must:
 - break implementation into small logical steps;
 - keep each implementation step focused on one meaningful change;
 - put steps in the correct execution order;
+- include focused tests alongside the functionality they verify;
+- split broad steps when multiple parts can reasonably be implemented and verified independently;
 - mention relevant validation for each step where useful;
 - mention manual browser testing only where it is actually useful;
 - clearly list missing information or open questions;
@@ -122,28 +142,52 @@ Do not mark implementation steps as completed during the planning phase.
 
 ## Step Size
 
-Prefer small implementation steps.
+Prefer small implementation steps that can be completed and verified independently.
+
+A step should normally represent one focused change or one closely related piece of functionality.
 
 A step should normally be small enough that it can be:
 
 1. implemented;
 2. reviewed;
-3. validated;
+3. validated with relevant automated checks;
 4. manually tested if necessary;
 5. marked completed;
 
 before moving to the next step.
 
-Do not combine unrelated changes into one step.
+Split a step when it combines multiple independent concerns, for example:
+
+- API integration and complex UI implementation;
+- several unrelated filters;
+- multiple independent hooks;
+- several distinct user flows;
+- implementation plus a large unrelated refactor;
+- all feature tests at the end of the task.
+
+Do not create artificially tiny steps for trivial edits that only make sense together.
+
+Prefer meaningful implementation boundaries over a fixed number of files or lines.
 
 Avoid overly broad steps such as:
 
 - "Implement the feature";
 - "Update frontend";
+- "Add all filters";
 - "Fix everything";
 - "Add tests".
 
 Describe the concrete change that should be made.
+
+### Tests Within Steps
+
+Plan focused tests together with the functionality they verify.
+
+When a step introduces meaningful logic, validation, state management, API behavior, or user interaction, include the relevant tests in that step or in an immediately following focused test step.
+
+Do not postpone all feature tests to one large final testing step.
+
+The final validation phase should focus on the full project checks and regression verification rather than implementing the majority of the feature's tests.
 
 ## Required Structure
 
